@@ -2,6 +2,6 @@
 .godot/
 /android/
 
-result/
+result*
 out/
 .direnv/
