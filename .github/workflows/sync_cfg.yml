@@ -34,9 +34,10 @@ jobs:
 
       - name: Sync project.config.json
         run: |
-          open project.config.json
-          | update name (open project.godot | from ini | get application?.'config/name'? | default $in.name)
-          | update version (open project.godot | from ini | get application?.'config/version'? | default $in.version)
+          let project_config = open project.config.json
+          $project_config
+          | update name (open project.godot | from ini | get application?.'config/name'? | default $project_config.name)
+          | update version (open project.godot | from ini | get application?.'config/version'? | default $project_config.version)
           | save -f project.config.json
           print "Updated project.config.json"
 
