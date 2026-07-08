@@ -1,0 +1,35 @@
+name: Nix Build CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v17
+        with:
+          name: cafundogames
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+
+      - name: Build linux preset
+        run: nix build .#linux
+
+      - name: Build windows preset
+        run: nix build .#windows
+
+      - name: Build web preset
+        run: nix build .#web
+
+      - name: Build and run nixos wrapper
+        run: nix run .#nixos -- --headless --quit

@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://c3q0q60tma6dg"]
+
+[ext_resource type="Texture2D" uid="uid://ca2athhue6egb" path="res://assets/cafundogames/cafundo_logo_full.min.svg" id="1_kkvs4"]
+
+[node name="Main" type="Node" unique_id=1413767144]
+
+[node name="CafundoLogoFull" type="Sprite2D" parent="." unique_id=388975469]
+position = Vector2(960, 540)
+texture = ExtResource("1_kkvs4")
