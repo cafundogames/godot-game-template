@@ -23,12 +23,12 @@
         {
           packages =
             let
-              mkGodot = pkgs.callPackage (import ./mkgodot.nix).mkGodot {
+              inherit (pkgs) callPackage;
+              inherit (import ./mkgodot.nix) mkGodot mkGodotNixosPatch;
+
+              settings = builtins.fromJSON (builtins.readFile ./project.config.json) // {
                 godot = self'.packages.godot;
                 export-templates = self'.packages.export-templates;
-              };
-              mkGodotNixosPatch = pkgs.callPackage (import ./mkgodot.nix).mkGodotNixosPatch { };
-              settings = builtins.fromJSON (builtins.readFile ./project.config.json) // {
                 src = ./.;
               };
             in
@@ -36,23 +36,42 @@
               godot = pkgs.godot;
               export-templates = pkgs.godot.export-templates-bin;
 
-              linux = mkGodot {
-                inherit (settings) pname version src;
+              linux = callPackage mkGodot {
+                inherit (settings)
+                  pname
+                  version
+                  src
+                  godot
+                  export-templates
+                  ;
                 preset = "linux";
               };
 
-              windows = mkGodot {
-                inherit (settings) pname version src;
+              windows = callPackage mkGodot {
+                inherit (settings)
+                  pname
+                  version
+                  src
+                  godot
+                  export-templates
+                  ;
                 preset = "windows";
               };
 
-              web = mkGodot {
-                inherit (settings) pname version src;
+              web = callPackage mkGodot {
+                inherit (settings)
+                  pname
+                  version
+                  src
+                  godot
+                  export-templates
+                  ;
                 preset = "web";
               };
 
-              nixos = mkGodotNixosPatch {
-                inherit (settings) pname version;
+              nixos = callPackage mkGodotNixosPatch {
+                inherit (settings) version;
+                pname = "${settings.pname}-nixos";
                 src = self'.packages.linux;
               };
             };

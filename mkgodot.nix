@@ -4,11 +4,8 @@
       lib,
       stdenv,
       patchelf,
-      copyDesktopItems,
       godot,
       export-templates,
-    }:
-    {
       pname,
       version,
       src,
@@ -16,20 +13,31 @@
       meta ? {
         mainProgram = "${pname}";
       },
-      desktopItems ? [ ],
       exportMode ? "release",
     }:
+    let
+      checkedExportMode =
+        if
+          builtins.elem exportMode [
+            "release"
+            "debug"
+          ]
+        then
+          exportMode
+        else
+          throw "exportMode must be either 'release' or 'debug', got '${exportMode}'";
+    in
     stdenv.mkDerivation {
       inherit
-        pname
         version
         src
-        desktopItems
         meta
         ;
+      pname = "${pname}-${preset}${
+        lib.optionalString (checkedExportMode != "release") "-${checkedExportMode}"
+      }";
 
       buildInputs = [
-        copyDesktopItems
         godot
         patchelf
       ];
@@ -59,13 +67,11 @@
         sed -i '/custom_template/ s/"[^"]*"/""/g' export_presets.cfg
         mkdir -p $out/share/${pname}
         if [ "$PLATFORM" == "Web" ]; then
-            ${lib.getExe godot} --headless --import --export-${exportMode} "${preset}" $out/share/${pname}/index.html
+            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/index.html
         elif [ "$PLATFORM" == "Windows Desktop" ]; then
-            ${lib.getExe godot} --headless --import --export-${exportMode} "${preset}" $out/share/${pname}/${pname}.exe
-        elif [ "$PLATFORM" == "Android" ]; then
-            ${lib.getExe godot} --headless --import --export-${exportMode} "${preset}" $out/share/${pname}/${pname}.apk
+            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/${pname}.exe
         elif [ "$PLATFORM" == "Linux" ]; then
-            ${lib.getExe godot} --headless --import --export-${exportMode} "${preset}" $out/share/${pname}/${pname}
+            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/${pname}
         else
             echo "Error: preset '${preset}' has a platform that is not handled in this script"
             exit 1
@@ -95,7 +101,6 @@
   mkGodotNixosPatch =
     {
       stdenv,
-      copyDesktopItems,
       installShellFiles,
       autoPatchelfHook,
       vulkan-loader,
@@ -112,24 +117,19 @@
       libxrender,
       libxi,
       libxfixes,
-    }:
-    {
       pname,
       version,
       src,
-      desktopItems ? [ ],
     }:
     stdenv.mkDerivation {
       inherit
         pname
         version
         src
-        desktopItems
         ;
       nativeBuildInputs = [
         autoPatchelfHook
         installShellFiles
-        copyDesktopItems
       ];
       runtimeDependencies = [
         vulkan-loader
