@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="godot-game-template"
+config/name="Godot Game Template"
 run/main_scene="uid://c3q0q60tma6dg"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/bg_color=Color(0.09803922, 0.09019608, 0.14117648, 1)
@@ -39,6 +39,9 @@ window/handheld/orientation=4
 window/size/mode.editor_hint=0
 window/size/window_width_override.editor_hint=960
 window/size/window_height_override.editor_hint=540
+window/size/mode.debug=0
+window/size/window_width_override.debug=960
+window/size/window_height_override.debug=540
 
 [editor]
 

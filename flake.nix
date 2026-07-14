@@ -28,28 +28,26 @@
                 export-templates = self'.packages.export-templates;
               };
               mkGodotNixosPatch = pkgs.callPackage (import ./mkgodot.nix).mkGodotNixosPatch { };
-              settings = builtins.fromJSON (builtins.readFile ./project.config.json);
-              src = ./.;
+              settings = builtins.fromJSON (builtins.readFile ./project.config.json) // {
+                src = ./.;
+              };
             in
             {
               godot = pkgs.godot;
               export-templates = pkgs.godot.export-templates-bin;
 
               linux = mkGodot {
-                inherit (settings) pname version;
-                inherit src;
+                inherit (settings) pname version src;
                 preset = "linux";
               };
 
               windows = mkGodot {
-                inherit (settings) pname version;
-                inherit src;
+                inherit (settings) pname version src;
                 preset = "windows";
               };
 
               web = mkGodot {
-                inherit (settings) pname version;
-                inherit src;
+                inherit (settings) pname version src;
                 preset = "web";
               };
 

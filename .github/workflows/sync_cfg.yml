@@ -36,8 +36,12 @@ jobs:
         run: |
           let project_config = open project.config.json
           $project_config
-          | update name (open project.godot | from ini | get application?.'config/name'? | default $project_config.name)
-          | update version (open project.godot | from ini | get application?.'config/version'? | default $project_config.version)
+          | update name (open -r project.godot | lines | where $it =~ "config/name="
+            | str replace -r 'config/name="(?<name>.*)"' '$name'
+            | get 0? | default $project_config.name)
+          | update version (open -r project.godot | lines | where $it =~ "config/version="
+            | str replace -r 'config/version="(?<version>.*)"' '$version'
+            | get 0? | default $project_config.version)
           | save -f project.config.json
           print "Updated project.config.json"
 
