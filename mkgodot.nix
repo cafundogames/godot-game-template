@@ -1,11 +1,11 @@
 {
-  mkGodot =
+  mkGodotGame =
     {
       lib,
-      stdenv,
+      stdenvNoCC,
       patchelf,
       godot,
-      export-templates,
+      export-templates ? godot.export-templates-bin,
       pname,
       version,
       src,
@@ -13,29 +13,15 @@
       meta ? {
         mainProgram = "${pname}";
       },
-      exportMode ? "release",
+      ...
     }:
-    let
-      checkedExportMode =
-        if
-          builtins.elem exportMode [
-            "release"
-            "debug"
-          ]
-        then
-          exportMode
-        else
-          throw "exportMode must be either 'release' or 'debug', got '${exportMode}'";
-    in
-    stdenv.mkDerivation {
+    stdenvNoCC.mkDerivation {
       inherit
         version
         src
         meta
         ;
-      pname = "${pname}-${preset}${
-        lib.optionalString (checkedExportMode != "release") "-${checkedExportMode}"
-      }";
+      pname = "${pname}-${preset}";
 
       buildInputs = [
         godot
@@ -67,11 +53,11 @@
         sed -i '/custom_template/ s/"[^"]*"/""/g' export_presets.cfg
         mkdir -p $out/share/${pname}
         if [ "$PLATFORM" == "Web" ]; then
-            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/index.html
+            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/index.html
         elif [ "$PLATFORM" == "Windows Desktop" ]; then
-            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/${pname}.exe
+            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/${pname}.exe
         elif [ "$PLATFORM" == "Linux" ]; then
-            ${lib.getExe godot} --headless --import --export-${checkedExportMode} "${preset}" $out/share/${pname}/${pname}
+            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/${pname}
         else
             echo "Error: preset '${preset}' has a platform that is not handled in this script"
             exit 1
@@ -83,12 +69,9 @@
         runHook preInstall
         mkdir -p $out/bin
         if [ "$PLATFORM" == "Linux" ]; then
-            patchelf --set-interpreter $(cat $NIX_CC/nix-support/dynamic-linker) $out/share/${pname}/${pname} || true
             ln -s $out/share/${pname}/${pname} $out/bin/${pname}
-        elif [ "$PLATFORM" == "Windows Desktop" ]; then
-            ln -s $out/share/${pname}/${pname}.exe $out/bin/${pname}.exe
         else
-            ln -s $out/share/${pname}/* $out/bin/
+          echo "Platforms other than Linux do not need this step. All files can be found at $out/share/${pname}/"
         fi
         runHook postInstall
       '';
@@ -98,9 +81,9 @@
       '';
     };
 
-  mkGodotNixosPatch =
+  patchGodotGame =
     {
-      stdenv,
+      stdenvNoCC,
       installShellFiles,
       autoPatchelfHook,
       vulkan-loader,
@@ -120,13 +103,16 @@
       pname,
       version,
       src,
+      meta ? src.meta,
+      ...
     }:
-    stdenv.mkDerivation {
+    stdenvNoCC.mkDerivation {
       inherit
-        pname
         version
         src
+        meta
         ;
+      pname = "${pname}-nixos";
       nativeBuildInputs = [
         autoPatchelfHook
         installShellFiles
@@ -150,9 +136,9 @@
       installPhase = ''
         runHook preInstall
         mkdir $out
-        mv bin/* bin/${pname} || true # Rename fails if pname is the same
         cp -r * $out
         runHook postInstall
       '';
+
     };
 }

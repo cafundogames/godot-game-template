@@ -1,5 +1,13 @@
 {
+  "__comment0": "package name; preferably in kebab-case;",
   "pname": "godot-game-template",
+  "__comment1": "game human-readable name; will be updated from project.godot",
   "name": "Godot Game Template",
-  "version": "1.0.0"
+  "__comment2": "game version; will be updated from project.godot",
+  "version": "1.0.0",
+  "__comment3": "itch.io information",
+  "itchio": {
+    "username": "cafundogames",
+    "gamename": "godot-game-template"
+  }
 }
