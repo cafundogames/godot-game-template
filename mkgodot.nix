@@ -1,7 +1,6 @@
 {
   mkGodotGame =
     {
-      lib,
       stdenvNoCC,
       patchelf,
       godot,
@@ -53,11 +52,11 @@
         sed -i '/custom_template/ s/"[^"]*"/""/g' export_presets.cfg
         mkdir -p $out/share/${pname}
         if [ "$PLATFORM" == "Web" ]; then
-            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/index.html
+            ${godot}/bin/godot --headless --import --export-release "${preset}" $out/share/${pname}/index.html
         elif [ "$PLATFORM" == "Windows Desktop" ]; then
-            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/${pname}.exe
+            ${godot}/bin/godot --headless --import --export-release "${preset}" $out/share/${pname}/${pname}.exe
         elif [ "$PLATFORM" == "Linux" ]; then
-            ${lib.getExe godot} --headless --import --export-release "${preset}" $out/share/${pname}/${pname}
+            ${godot}/bin/godot --headless --import --export-release "${preset}" $out/share/${pname}/${pname}
         else
             echo "Error: preset '${preset}' has a platform that is not handled in this script"
             exit 1
@@ -71,7 +70,7 @@
         if [ "$PLATFORM" == "Linux" ]; then
             ln -s $out/share/${pname}/${pname} $out/bin/${pname}
         else
-          echo "Platforms other than Linux do not need this step. All files can be found at $out/share/${pname}/"
+            echo "Platforms other than Linux do not need this step. All files can be found at $out/share/${pname}/"
         fi
         runHook postInstall
       '';
@@ -100,18 +99,14 @@
       libxrender,
       libxi,
       libxfixes,
-      pname,
-      version,
       src,
-      meta ? src.meta,
+      pname,
       ...
     }:
     stdenvNoCC.mkDerivation {
-      inherit
-        version
-        src
-        meta
-        ;
+      inherit src;
+      inherit (src) version meta;
+
       pname = "${pname}-nixos";
       nativeBuildInputs = [
         autoPatchelfHook

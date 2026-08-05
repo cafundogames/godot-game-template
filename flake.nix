@@ -40,7 +40,7 @@
               web = mkGodotGamePackage "web" ./.;
 
               nixos = callPackage patchGodotGame {
-                inherit (settings) pname version;
+                inherit (settings) pname;
                 src = self'.packages.linux;
               };
             };
